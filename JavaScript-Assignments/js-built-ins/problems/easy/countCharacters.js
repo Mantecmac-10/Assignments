@@ -32,4 +32,3 @@ const countCharacters = (statement) => {
   return result;
 };
 module.exports = countCharacters;
-
