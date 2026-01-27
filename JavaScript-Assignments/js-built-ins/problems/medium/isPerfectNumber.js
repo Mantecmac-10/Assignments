@@ -27,6 +27,21 @@
 
 function isPerfectNumber(num) {
   // Your code here
+  isPerfect = false;
+  const arr = [];
+  let sum = 0;
+  for (let i = 1; i <= num / 2; i++) {
+    if (num % i === 0) {
+      arr.push(i);
+    }
+  }
+  for (let j = 0; j < arr.length; j++) {
+    sum += arr[j];
+    if (sum === num) {
+      isPerfect = true;
+    }
+  }
+  return isPerfect;
 }
 
 module.exports = { isPerfectNumber };
