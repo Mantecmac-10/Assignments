@@ -20,7 +20,13 @@
   Once you've implemented the logic, test your code by running
   - `npm run test-nonrepeat`
 */
-function nonrepeat(str) {
-  // Your code here
-}
+const nonrepeat = (str) => {
+    const chars = str.split("");
+
+    const firstUnique = chars.find((char) => {
+        return str.indexOf(char) === str.lastIndexOf(char);
+    });
+
+    return firstUnique || null;
+};
 module.exports = nonrepeat;
