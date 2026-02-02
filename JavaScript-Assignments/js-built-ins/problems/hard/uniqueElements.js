@@ -20,6 +20,14 @@
 
 function getUniqueElements(arr) {
   // Your code here
+  let newarr = [];
+  for (i = 0; i < arr.length; i++) {
+    if (!newarr.includes(arr[i])) {
+      newarr.push(arr[i]);
+    }
+  }
+
+  return newarr;
 }
 
 module.exports = getUniqueElements;
