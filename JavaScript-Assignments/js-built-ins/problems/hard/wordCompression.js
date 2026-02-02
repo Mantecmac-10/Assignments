@@ -21,10 +21,24 @@
   - `npm run test-compressWord`
 */
 
-
 function compressWords(arr) {
   // Your code here
-}
+  let newarr = [];
+  for (i = 0; i < arr.length; i++) {
+    let count = 1;
+    while (arr[i] === arr[i + 1]) {
+      count++;
+      i++;
+    }
+    if (count > 1) {
+      newarr.push(arr[i] + count);
+    }
 
+    if (count === 1) {
+      newarr.push(arr[i]);
+    }
+  }
+  return newarr;
+}
 
 module.exports = compressWords;
