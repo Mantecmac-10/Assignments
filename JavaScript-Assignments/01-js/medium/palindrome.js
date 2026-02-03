@@ -7,7 +7,9 @@
 */
 
 function isPalindrome(str) {
-    return true;
+  const cleanStr = str.toLowerCase().replace(/[\s\p{P}]/gu, '');
+
+  return cleanStr === cleanStr.split('').reverse().join('');
 }
 
 module.exports = isPalindrome;
