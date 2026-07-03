@@ -29,78 +29,87 @@
   Testing the server - run `npm run test-authenticationServer` command in terminal
  */
 
-  const express = require("express")
-  const PORT = 3000;
-  const app = express();
-  // write your logic here, DONT WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
-  
-  var users = [];
-  
-  app.use(express.json());
-  app.post("/signup", (req, res) => {
-    var user = req.body;
-    let userAlreadyExists = false;
-    for (var i = 0; i<users.length; i++) {
-      if (users[i].email === user.email) {
-          userAlreadyExists = true;
-          break;
-      }
-    }
-    if (userAlreadyExists) {
-      res.sendStatus(400);
-    } else {
-      users.push(user);
-      res.status(201).send("Signup successful");
-    }
+const express = require("express");
+const PORT = 3000;
+const app = express();
+const { v4: uuid } = require("uuid");
+// write your logic here, DONT WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
+
+app.use(express.json());
+
+let users = [];
+
+//1
+app.post("/signup", function (req, res) {
+  const { password, firstName, lastName, email } = req.body;
+  const isThere = users.find(user => user.email === email);
+  if (isThere) {
+    return res.status(400);
+  }
+  const newUser = {
+    id: uuid(),
+    password,
+    firstName,
+    lastName,
+    email,
+  };
+  users.push(newUser);
+
+  res.status(201).send("Signup successful");
+});
+
+//2
+app.post("/login", function (req, res) {
+  const { email, password } = req.body;
+  const user = users.find(
+    (user) => user.email === email && user.password === password,
+  );
+  if (!user) {
+    return res.status(401).json({ message: "Credentials are invalid" });
+  }
+
+  const token = `token ${user.id}`;
+
+  res.status(200).json({
+    token,
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
   });
-  
-  app.post("/login", (req, res) => {
-    var user = req.body;
-    let userFound = null;
-    for (var i = 0; i<users.length; i++) {
-      if (users[i].email === user.email && users[i].password === user.password) {
-          userFound = users[i];
-          break;
-      }
-    }
-  
-    if (userFound) {
-      res.json({
-          firstName: userFound.firstName,
-          lastName: userFound.lastName,
-          email: userFound.email
-      });
-    } else {
-      res.sendStatus(401);
-    }
+});
+
+//3
+app.get("/data", function (req, res) {
+  const email = req.headers.email;
+  const password = req.headers.password;
+
+  if (!email || !password) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const user = users.find(
+    (user) => user.email === email && user.password === password,
+  );
+
+  if (!user) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const result = users.map((user) => ({
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+  }));
+
+  res.status(200).json({
+    users: result,
   });
-  
-  app.get("/data", (req, res) => {
-    var email = req.headers.email;
-    var password = req.headers.password;
-    let userFound = false;
-    for (var i = 0; i<users.length; i++) {
-      if (users[i].email === email && users[i].password === password) {
-          userFound = true;
-          break;
-      }
-    }
-  
-    if (userFound) {
-      let usersToReturn = [];
-      for (let i = 0; i<users.length; i++) {
-          usersToReturn.push({
-              firstName: users[i].firstName,
-              lastName: users[i].lastName,
-              email: users[i].email
-          });
-      }
-      res.json({
-          users
-      });
-    } else {
-      res.sendStatus(401);
-    }
-  });
-  
-  module.exports = app;
+});
+
+app.use(function (req, res) {
+  res.status(404).json({ message: "Not Found" });
+});
+
+module.exports = app;
