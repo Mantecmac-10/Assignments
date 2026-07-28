@@ -5,7 +5,7 @@ export const signupSchema = z.object({
   email: z.email("Enter a valid email address!"),
   password: z.string().min(6, "Password should be more than 6 characters."),
   name: z.string(),
-  role: z.enum(Role).default("Student"),
+  role: z.enum(Role).default("STUDENT"),
 });
 
 export const loginSchema = signupSchema.pick({

@@ -58,6 +58,6 @@ model Purchase {
 }
 
 enum Role{
-Student
-Instructor
+STUDENT
+INSTRUCTOR
 }

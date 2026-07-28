@@ -1,10 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import type { Role} from "../generated/prisma/client";
 
 declare global {
   namespace Express {
     interface Request {
       userId?: string;
+      role: Role;
     }
   }
 }
