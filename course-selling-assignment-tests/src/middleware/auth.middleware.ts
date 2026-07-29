@@ -1,14 +1,21 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import type { Role} from "../generated/prisma/client";
+import { Role } from "../generated/prisma/client";
 
 declare global {
   namespace Express {
     interface Request {
-      userId?: string;
-      role: Role;
+      user?: {
+        id: string;
+        role: Role;
+      };
     }
   }
+}
+
+interface JwtPayload {
+  id: string;
+  role: Role;
 }
 
 export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
@@ -19,14 +26,27 @@ export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-    };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
-    req.userId = decoded.id;
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+    };
     next();
   } catch (error) {
     console.error("Invalid Token", error);
     return res.status(401).send("Invalid Token");
   }
+};
+
+export const requireRole = (role: Role) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user?.id) {
+      return res.status(401).send("Unauthorized User!");
+    }
+    if (!role.includes(req.user.role)) {
+      return res.status(403).send("Forbidden!");
+    }
+    next();
+  };
 };
