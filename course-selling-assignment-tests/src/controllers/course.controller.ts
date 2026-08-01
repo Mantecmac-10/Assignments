@@ -18,14 +18,9 @@ export const createCourse = async (req: Request, res: Response) => {
         price,
         instructorId: req.user?.id,
       },
-      select: {
-        title,
-        description,
-        price,
-      },
     });
 
-    return res.status(200).send({ message: "Course Created!", course });
+    return res.status(200).json({ id: course.id });
   } catch (error) {
     console.error(error);
 
@@ -37,29 +32,9 @@ export const createCourse = async (req: Request, res: Response) => {
 
 export const publicCourse = async (req: Request, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
-    }
+    const data = await prisma.course.findMany();
 
-    const courses = await prisma.course.findMany({
-      select: {
-        title: true,
-        description: true,
-        price: true,
-        instructor: {
-          select: {
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    return res.status(500).json({ courses });
+    return res.json(data);
   } catch (error) {
     console.error(error);
 
@@ -77,9 +52,67 @@ export const listLesson = async (req: Request, res: Response) => {
       });
     }
 
-    const courseId = req.params;
+    const id = req.params.id as string;
 
-    const course = 
+    const course = await prisma.course.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        lessons: true,
+      },
+    });
+    if (!course) {
+      return res.status(404).json({
+        message: "Course Not Found",
+      });
+    }
+
+    return res.status(200).json({
+      course,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const editCourse = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    const id = req.params.id as string;
+
+    const { title, description, price } = req.body;
+
+    const newCourse = await prisma.course.update({
+      where: {
+        id: id,
+      },
+      data: {
+        title: title,
+        description: description,
+        price: price,
+      },
+      select: {
+        title: true,
+        description: true,
+        price: true,
+      },
+    });
+
+    if (!newCourse) {
+      return res.status(400).json("Course Not Found!");
+    }
+
+    return res.status(200).json({ newCourse });
   } catch (error) {
     console.error(error);
 
