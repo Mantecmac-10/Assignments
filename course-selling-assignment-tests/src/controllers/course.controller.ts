@@ -44,22 +44,13 @@ export const publicCourse = async (req: Request, res: Response) => {
   }
 };
 
-export const listLesson = async (req: Request, res: Response) => {
+export const getCourse = async (req: Request, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
-    }
-
     const id = req.params.id as string;
 
     const course = await prisma.course.findUnique({
       where: {
         id: id,
-      },
-      include: {
-        lessons: true,
       },
     });
     if (!course) {
@@ -68,9 +59,7 @@ export const listLesson = async (req: Request, res: Response) => {
       });
     }
 
-    return res.status(200).json({
-      course,
-    });
+    return res.status(200).json(course);
   } catch (error) {
     console.error(error);
 
@@ -94,14 +83,15 @@ export const editCourse = async (req: Request, res: Response) => {
 
     const newCourse = await prisma.course.update({
       where: {
-        id: id,
+        id,
       },
       data: {
-        title: title,
-        description: description,
-        price: price,
+        title,
+        description,
+        price,
       },
       select: {
+        id: true,
         title: true,
         description: true,
         price: true,
@@ -112,7 +102,35 @@ export const editCourse = async (req: Request, res: Response) => {
       return res.status(400).json("Course Not Found!");
     }
 
-    return res.status(200).json({ newCourse });
+    return res.status(200).json(newCourse);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const deleteCourse = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+    const id = req.params.id as string;
+
+    const course = await prisma.course.delete({
+      where: { id },
+    });
+
+    if (!course) {
+      return res.status(400).json("Course Not Found");
+    }
+
+    return res.status(200).json({ message: "Course deleted" });
   } catch (error) {
     console.error(error);
 

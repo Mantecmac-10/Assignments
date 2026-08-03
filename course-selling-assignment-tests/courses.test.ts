@@ -11,7 +11,6 @@ const password = "password123";
 let studentToken = "";
 const studentEmail = `student_${Date.now()}@test.com`;
 
-
 describe("Course APIs", () => {
   it("should signup instructor", async () => {
     const res = await fetch(`${BASE_URL}/auth/signup`, {
@@ -73,6 +72,8 @@ describe("Course APIs", () => {
   });
 
   it("should get course by id", async () => {
+    console.log("courseId:", courseId);
+
     const res = await fetch(`${BASE_URL}/courses/${courseId}`);
     const data = await res.json();
 
@@ -92,8 +93,11 @@ describe("Course APIs", () => {
       }),
     });
 
+    console.log(res.status);
+
     const data = await res.json();
     expect(data.title).toBe("Updated Course Title");
+    console.log(data);
   });
 
   it("should delete course", async () => {
@@ -139,7 +143,6 @@ describe("Course APIs", () => {
     expect(studentToken).toBeDefined();
   });
 
-
   it("student cannot create course", async () => {
     const res = await fetch(`${BASE_URL}/courses`, {
       method: "POST",
@@ -155,5 +158,4 @@ describe("Course APIs", () => {
 
     expect(res.status).toBe(403);
   });
-
 });
