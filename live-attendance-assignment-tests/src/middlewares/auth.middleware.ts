@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { config } from "../config/env";
+import { ApiError } from "../utils/ApiError";
 
 declare global {
   namespace Express {
@@ -19,10 +20,12 @@ interface JwtPayload {
 }
 
 export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.headers.authorization
 
   if (!token) {
-    return res.status(401).send("Authorization Token Missing.");
+    return res
+      .status(401)
+      .json(new ApiError("Unauthorized, token missing or invalid"));
   }
 
   try {
@@ -34,8 +37,10 @@ export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
     };
     next();
   } catch (error) {
-    console.error("Invalid Token", error);
-    return res.status(401).send("Invalid Token");
+    res
+      .status(401)
+      .json(new ApiError("Unauthorized, token missing or invalid"));
+    return;
   }
 };
 
