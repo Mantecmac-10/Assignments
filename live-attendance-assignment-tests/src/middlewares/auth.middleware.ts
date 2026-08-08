@@ -6,7 +6,7 @@ import { ApiError } from "../utils/ApiError";
 declare global {
   namespace Express {
     interface Request {
-      user?: {
+      user: {
         id: string;
         role: "teacher" | "student";
       };
@@ -20,7 +20,7 @@ interface JwtPayload {
 }
 
 export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization
+  const token = req.headers.authorization;
 
   if (!token) {
     return res
@@ -44,14 +44,16 @@ export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export const requireRole = (role: "teacher" | "student") => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user?.id) {
-      return res.status(401).send("Unauthorized User!");
-    }
-    if (!role.includes(req.user.role)) {
-      return res.status(403).send("Forbidden!");
-    }
-    next();
-  };
+export const onlyTeacher = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (req.user.role !== "teacher") {
+    return res
+      .status(403)
+      .json(new ApiError("Forbidden, teacher access required"));
+  }
+
+  next();
 };
