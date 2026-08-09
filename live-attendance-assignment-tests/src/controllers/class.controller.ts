@@ -1,9 +1,10 @@
-import type { Request, Response } from "express";
+import { json, type Request, type Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { addstudentSchema, classSchema } from "../validation/class.valid";
 import classModel from "../models/class.model";
 import { ApiResponse } from "../utils/ApiResponse";
 import userModel from "../models/user.model";
+import attendanceModel from "../models/attendance.model";
 
 export const createClass = async (req: Request, res: Response) => {
   try {
@@ -130,6 +131,51 @@ export const classInfo = async (req: Request, res: Response) => {
     };
 
     return res.status(200).json(new ApiResponse(result));
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const myAttendance = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json(new ApiError("Unauthorized"));
+    }
+
+    const id = req.params.id;
+
+    const classExist = await classModel.findById(id);
+    if (!classExist) {
+      return res.status(404).json(new ApiError("Class not found"));
+    }
+
+    const isStudent =
+      req.user.role === "student" &&
+      classExist.studentIds.some((s) => s._id.toString() === req.user.id);
+    if (!isStudent) {
+      return res.status(403).json(new ApiError("Forbidden, not class student"));
+    }
+
+    const attendance = await attendanceModel.findOne({ id });
+    if (attendance?.status) {
+      return res.status(200).json(
+        new ApiResponse({
+          id,
+          status: attendance.status,
+        }),
+      );
+    }
+
+    return res.json(
+      new ApiResponse({
+        id,
+        status: null,
+      }),
+    );
   } catch (error) {
     console.error(error);
 
