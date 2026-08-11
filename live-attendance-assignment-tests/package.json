@@ -4,7 +4,7 @@
   "description": "Tests for the Live Attendance System - run against any compliant server",
   "main": "index.ts",
   "scripts": {
-    "start": "bun --preload ./patch.ts src/index.ts",
+    "start": "bun --preload ./patch.ts src/app.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui"
@@ -27,7 +27,8 @@
     "@types/bcrypt": "^6.0.0",
     "@types/bun": "latest",
     "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10"
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/ws": "^8.18.1"
   },
   "peerDependencies": {
     "typescript": "^5"
