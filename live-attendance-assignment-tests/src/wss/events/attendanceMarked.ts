@@ -1,10 +1,10 @@
 import type { WebSocketServer } from "ws";
-import type { CustomWebSocket } from "./ws";
-import { WsError } from "../utils/wsError";
-import { activeSession } from "../store/activeSession";
-import classModel from "../models/class.model";
-import { WsMessage } from "../utils/wsMessage";
-import { broadcast } from "../utils/broadcast";
+import type { CustomWebSocket } from "../ws";
+import { WsError } from "../../utils/wsError";
+import { activeSession } from "../../store/activeSession";
+import classModel from "../../models/class.model";
+import { WsMessage } from "../../utils/wsMessage";
+import { broadcast } from "../../utils/broadcast";
 
 export const handleAttendanceMarked = async (
   ws: CustomWebSocket,

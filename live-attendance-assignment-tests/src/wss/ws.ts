@@ -6,7 +6,8 @@ import type { Request } from "express";
 import { WsError } from "../utils/wsError";
 import jwt from "jsonwebtoken";
 import { config } from "../config/env";
-import { handleAttendanceMarked } from "./attendanceMarked";
+import { handleAttendanceMarked } from "./events/attendanceMarked";
+import { handleTodaySummary } from "./events/todaySummary";
 
 const wss = new WebSocketServer({ server, path: "/ws" });
 
@@ -17,7 +18,7 @@ export interface CustomWebSocket extends WebSocket {
   };
 }
 
-wss.on("connection", (ws: CustomWebSocket, req: Request)=> {
+wss.on("connection", (ws: CustomWebSocket, req: Request) => {
   console.log("WS Server connected....");
 
   const parsedUrl = url.parse(req.url, true);
@@ -56,6 +57,9 @@ wss.on("connection", (ws: CustomWebSocket, req: Request)=> {
     switch (event) {
       case "ATTENDANCE_MARKED":
         await handleAttendanceMarked(ws, data, wss);
+        break;
+      case "TODAY_SUMMARY":
+        await handleTodaySummary(ws, wss);
         break;
       default:
         ws.send(JSON.stringify(new WsError(`Unknown event`)));
