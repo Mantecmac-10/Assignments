@@ -1,4 +1,4 @@
-import { json, type Request, type Response } from "express";
+import { type Request, type Response } from "express";
 import { ApiError } from "../utils/ApiError";
 import { addstudentSchema, classSchema } from "../validation/class.valid";
 import classModel from "../models/class.model";
@@ -142,29 +142,30 @@ export const classInfo = async (req: Request, res: Response) => {
 
 export const myAttendance = async (req: Request, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json(new ApiError("Unauthorized"));
-    }
+    const classId = req.params.id as string;
 
-    const id = req.params.id;
+    const existingClass = await classModel.findById(classId);
 
-    const classExist = await classModel.findById(id);
-    if (!classExist) {
+    if (!existingClass) {
       return res.status(404).json(new ApiError("Class not found"));
     }
 
-    const isStudent =
+    const isEnrolledStudent =
       req.user.role === "student" &&
-      classExist.studentIds.some((s) => s._id.toString() === req.user.id);
-    if (!isStudent) {
-      return res.status(403).json(new ApiError("Forbidden, not class student"));
+      existingClass.studentIds.some((s) => s.toString() === req.user.id);
+
+    if (!isEnrolledStudent) {
+      return res.status(403).json(new ApiError("Forbidden, student only"));
     }
 
-    const attendance = await attendanceModel.findOne({ id });
+    const attendance = await attendanceModel.findOne({
+      classId,
+    });
+
     if (attendance?.status) {
       return res.status(200).json(
         new ApiResponse({
-          id,
+          classId,
           status: attendance.status,
         }),
       );
@@ -172,7 +173,7 @@ export const myAttendance = async (req: Request, res: Response) => {
 
     return res.json(
       new ApiResponse({
-        id,
+        classId,
         status: null,
       }),
     );

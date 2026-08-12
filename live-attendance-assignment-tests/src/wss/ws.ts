@@ -9,6 +9,7 @@ import { config } from "../config/env";
 import { handleAttendanceMarked } from "./events/attendanceMarked";
 import { handleTodaySummary } from "./events/todaySummary";
 import { myAttendance } from "./events/myAttendance";
+import { doneEvent } from "./events/doneEvent";
 
 const wss = new WebSocketServer({ server, path: "/ws" });
 
@@ -64,6 +65,9 @@ wss.on("connection", (ws: CustomWebSocket, req: Request) => {
         break;
       case "MY_ATTENDANCE":
         await myAttendance(ws);
+        break;
+      case "DONE":
+        await doneEvent(ws, wss);
         break;
       default:
         ws.send(JSON.stringify(new WsError(`Unknown event`)));
